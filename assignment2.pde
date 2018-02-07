@@ -587,7 +587,7 @@ class LineChart extends Chart {
       float y2 = hTerm + chartHeight + yShift + tickWidth;
       Line line = new Line(x, y1, x, y2);
       int tickLabelPad = 15;
-      float fontSize = PApplet.parseInt(min(11, 6 * (width / float(defaultWidth))));
+      float fontSize = int(min(11, 6 * (width / float(defaultWidth))));
       Tick tick = new Tick(point.label, line, tickLabelPad, fontSize);
       axes[0].addTick(tick);
     }
@@ -609,7 +609,7 @@ class LineChart extends Chart {
       float val = lerp(lowerBound, upperBound, reverseIndex/float(numTicks));
       String label = String.format("%." + 1 + "f", val);
       int tickLabelPad = -35;
-      float fontSize = PApplet.parseInt(min(11, 6 * (height / float(defaultHeight))));
+      float fontSize = int(min(11, 6 * (height / float(defaultHeight))));
       Tick tick = new Tick(label, line, tickLabelPad, fontSize);
       axes[0].addTick(tick);
     }
@@ -706,7 +706,7 @@ class BarChart extends Chart {
       float y2 = bar.y + tickWidth;
       Line line = new Line(x, y1, x, y2);
       int tickLabelPad = 15;
-      float fontSize = PApplet.parseInt(min(11, 6 * (width / float(defaultWidth))));
+      float fontSize = int(min(11, 6 * (width / float(defaultWidth))));
       Tick tick = new Tick(bar.label, line, tickLabelPad, fontSize);
       axes[0].addTick(tick);
     }
@@ -728,7 +728,7 @@ class BarChart extends Chart {
       float val = lerp(lowerBound, upperBound, reverseIndex/float(numTicks));
       String label = String.format("%." + 1 + "f", val);
       int tickLabelPad = -35;
-      float fontSize = PApplet.parseInt(min(11, 6 * (height / float(defaultHeight))));
+      float fontSize = int(min(11, 6 * (height / float(defaultHeight))));
       Tick tick = new Tick(label, line, tickLabelPad, fontSize);
       axes[0].addTick(tick);
     }
