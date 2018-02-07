@@ -279,8 +279,8 @@ public void verticalBarTransition(float hFinal) {
     Bar bar = barCopy[i];
     
     float yFinal = bar.y + bar.h;
-    float y = lerp(bar.y, yFinal, counter/PApplet.parseFloat(numTransitionSteps));
-    float h = lerp(bar.h, hFinal, counter/PApplet.parseFloat(numTransitionSteps));
+    float y = lerp(bar.y, yFinal, counter/float(numTransitionSteps));
+    float h = lerp(bar.h, hFinal, counter/float(numTransitionSteps));
     
     // update current bar
     Bar currBar = barChart.bars[i];
@@ -294,8 +294,8 @@ public void horizontalBarTransition(float wFinal) {
     Bar bar = barCopy[i];
     float center = (bar.x + bar.x + bar.w) / 2.0;
     //float x2 = bar.x + bar.w / 2;
-    float x = lerp(bar.x, center - wFinal/2, counter/PApplet.parseFloat(numTransitionSteps));
-    float w = lerp(bar.w, wFinal, counter/PApplet.parseFloat(numTransitionSteps));
+    float x = lerp(bar.x, center - wFinal/2, counter/float(numTransitionSteps));
+    float w = lerp(bar.w, wFinal, counter/float(numTransitionSteps));
     
     // update current bar
     Bar currBar = barChart.bars[i];
@@ -307,7 +307,7 @@ public void horizontalBarTransition(float wFinal) {
 public void pointBarTransition(float rFinal) {
   for (int i = 0; i < barChart.bars.length; i++) {
     Bar bar = barCopy[i];
-    float r = lerp(bar.radius, rFinal, counter/PApplet.parseFloat(numTransitionSteps));
+    float r = lerp(bar.radius, rFinal, counter/float(numTransitionSteps));
     
     // update current bar
     Bar currBar = barChart.bars[i];
@@ -322,8 +322,8 @@ public void connectPointsBarTransition() {
     Bar bar = barChart.bars[i];
     Bar nextBar = barChart.bars[i + 1];
     
-    float x = lerp(bar.x + bar.w/2, nextBar.x + nextBar.w/2, counter/PApplet.parseFloat(numTransitionSteps));
-    float y = lerp(bar.y + bar.h/2, nextBar.y + nextBar.h/2, counter/PApplet.parseFloat(numTransitionSteps));
+    float x = lerp(bar.x + bar.w/2, nextBar.x + nextBar.w/2, counter/float(numTransitionSteps));
+    float y = lerp(bar.y + bar.h/2, nextBar.y + nextBar.h/2, counter/float(numTransitionSteps));
     Line line = lineChart.lines[i];
     line.x1 = bar.x + bar.w/2;
     line.y1 = bar.y +  bar.h/2;
@@ -348,8 +348,8 @@ public void disconnectPointsBarTransition() {
   for (int i = 0; i < lineChart.lines.length; i++) {
     Line line = lineChart.lines[i];
     if (line != null){
-      float x = lerp(line.x2, line.x1, counter/PApplet.parseFloat(numTransitionSteps));
-      float y = lerp(line.y2, line.y1, counter/PApplet.parseFloat(numTransitionSteps));
+      float x = lerp(line.x2, line.x1, counter/float(numTransitionSteps));
+      float y = lerp(line.y2, line.y1, counter/float(numTransitionSteps));
       Line currLine = lineChart.lines[i];
       //Line currLine = lineArr[i];
       currLine.x2 = x;
@@ -364,7 +364,7 @@ public void barPointTransition(float rInit) {
   for (int i = 0; i < barChart.bars.length; i++) {
     //Bar bar = barCopy[i];
     //float r = lerp(bar.radius, 0, counter/float(numTransitionSteps));
-    float r = lerp(rInit, 0, counter/PApplet.parseFloat(numTransitionSteps));
+    float r = lerp(rInit, 0, counter/float(numTransitionSteps));
     // update current bar
     Bar currBar = barChart.bars[i];
     currBar.radius = r;
@@ -375,8 +375,8 @@ public void reverseHorizontalBarTransition() {
   for (int i = 0; i < barChart.bars.length; i++) {
     Bar bar = barCopy[i];
     Bar currBar = barChart.bars[i];
-    float x = lerp(currBar.x, bar.x, counter/PApplet.parseFloat(numTransitionSteps));
-    float w = lerp(currBar.w, bar.w, counter/PApplet.parseFloat(numTransitionSteps));
+    float x = lerp(currBar.x, bar.x, counter/float(numTransitionSteps));
+    float w = lerp(currBar.w, bar.w, counter/float(numTransitionSteps));
     
     // update current bar
     
@@ -389,8 +389,8 @@ public void reverseVerticalBarTransition() {
   for (int i = 0; i < barChart.bars.length; i++) {
     Bar bar = barCopy[i];
     Bar currBar = barChart.bars[i];
-    float y = lerp(currBar.y, bar.y, counter/PApplet.parseFloat(numTransitionSteps));
-    float h = lerp(currBar.h, bar.h, counter/PApplet.parseFloat(numTransitionSteps));
+    float y = lerp(currBar.y, bar.y, counter/float(numTransitionSteps));
+    float h = lerp(currBar.h, bar.h, counter/float(numTransitionSteps));
     
     // update current bar
     
@@ -506,7 +506,7 @@ class LineChart extends Chart {
   
   LineChart() {
     DataPoint[] data = new DataPoint[values.length];
-    float pointSpacing = chartWidth / PApplet.parseFloat(data.length);
+    float pointSpacing = chartWidth / float(data.length);
     for (int i = 0; i < data.length; i++) {
       String name = names[i];
       float value = values[i];
@@ -587,7 +587,7 @@ class LineChart extends Chart {
       float y2 = hTerm + chartHeight + yShift + tickWidth;
       Line line = new Line(x, y1, x, y2);
       int tickLabelPad = 15;
-      float fontSize = PApplet.parseInt(min(11, 6 * (width / PApplet.parseFloat(defaultWidth))));
+      float fontSize = PApplet.parseInt(min(11, 6 * (width / float(defaultWidth))));
       Tick tick = new Tick(point.label, line, tickLabelPad, fontSize);
       axes[0].addTick(tick);
     }
@@ -601,15 +601,15 @@ class LineChart extends Chart {
     int numTicks = 10;
     
     for (int i = 0; i < numTicks + 1; i++) {
-      float y = lerp(y1, y2, i/PApplet.parseFloat(numTicks));
+      float y = lerp(y1, y2, i/float(numTicks));
       Line line = new Line(x1, y, x2, y);
       int reverseIndex = -1 * (i - numTicks);
       float lowerBound = negValuesExist ? -maxAbsValue : 0;
       float upperBound = posValuesExist ? maxAbsValue : 0;
-      float val = lerp(lowerBound, upperBound, reverseIndex/PApplet.parseFloat(numTicks));
+      float val = lerp(lowerBound, upperBound, reverseIndex/float(numTicks));
       String label = String.format("%." + 1 + "f", val);
       int tickLabelPad = -35;
-      float fontSize = PApplet.parseInt(min(11, 6 * (height / PApplet.parseFloat(defaultHeight))));
+      float fontSize = PApplet.parseInt(min(11, 6 * (height / float(defaultHeight))));
       Tick tick = new Tick(label, line, tickLabelPad, fontSize);
       axes[0].addTick(tick);
     }
@@ -706,7 +706,7 @@ class BarChart extends Chart {
       float y2 = bar.y + tickWidth;
       Line line = new Line(x, y1, x, y2);
       int tickLabelPad = 15;
-      float fontSize = PApplet.parseInt(min(11, 6 * (width / PApplet.parseFloat(defaultWidth))));
+      float fontSize = PApplet.parseInt(min(11, 6 * (width / float(defaultWidth))));
       Tick tick = new Tick(bar.label, line, tickLabelPad, fontSize);
       axes[0].addTick(tick);
     }
@@ -720,15 +720,15 @@ class BarChart extends Chart {
     int numTicks = 10;
     
     for (int i = 0; i < numTicks + 1; i++) {
-      float y = lerp(y1, y2, i/PApplet.parseFloat(numTicks));
+      float y = lerp(y1, y2, i/float(numTicks));
       Line line = new Line(x1, y, x2, y);
       int reverseIndex = -1 * (i - numTicks);
       float lowerBound = negValuesExist ? -maxAbsValue : 0;
       float upperBound = posValuesExist ? maxAbsValue : 0;
-      float val = lerp(lowerBound, upperBound, reverseIndex/PApplet.parseFloat(numTicks));
+      float val = lerp(lowerBound, upperBound, reverseIndex/float(numTicks));
       String label = String.format("%." + 1 + "f", val);
       int tickLabelPad = -35;
-      float fontSize = PApplet.parseInt(min(11, 6 * (height / PApplet.parseFloat(defaultHeight))));
+      float fontSize = PApplet.parseInt(min(11, 6 * (height / float(defaultHeight))));
       Tick tick = new Tick(label, line, tickLabelPad, fontSize);
       axes[0].addTick(tick);
     }
