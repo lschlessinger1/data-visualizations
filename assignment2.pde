@@ -1,6 +1,6 @@
 int backgroundColor = color(255, 255, 255);
 
-String path = "data.csv";
+String path = "data/data.csv";
 String xName, yName;
 String[] names;
 int[] values;
