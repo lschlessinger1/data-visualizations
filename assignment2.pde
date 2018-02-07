@@ -404,14 +404,14 @@ class ResponsiveButton {
   float x, y, w, h;
   int backgroundColor = color(92,184,92);
   int textColor = color(250);
-  String text;
+  String btnText;
   
-  ResponsiveButton(float x, float y, float w, float h, String text) {
+  ResponsiveButton(float x, float y, float w, float h, String btnText) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
-    this.text = text;
+    this.btnText = btnText;
   }
   
   public void drawButton() {
@@ -421,7 +421,7 @@ class ResponsiveButton {
     fill(textColor);
     textSize(16);
     textAlign(CENTER);
-    text(text, x + w/2, y + h/2);
+    text(btnText, x + w/2, y + h/2);
   }
   
   public boolean hovered() {
