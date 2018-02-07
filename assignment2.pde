@@ -53,7 +53,7 @@ public void setup() {
   size(1000, 750);
   
   // Remove this line to post online for Processing.js compatibility
-  surface.setResizable(true);
+  //surface.setResizable(true);
 
   loadStrings();
   
