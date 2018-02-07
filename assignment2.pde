@@ -607,7 +607,7 @@ class LineChart extends Chart {
       float lowerBound = negValuesExist ? -maxAbsValue : 0;
       float upperBound = posValuesExist ? maxAbsValue : 0;
       float val = lerp(lowerBound, upperBound, reverseIndex/float(numTicks));
-      String label = String.format("%." + 1 + "f", val);
+      String label = str(round(val*10)/10);
       int tickLabelPad = -35;
       float fontSize = int(min(11, 6 * (height / float(defaultHeight))));
       Tick tick = new Tick(label, line, tickLabelPad, fontSize);
