@@ -307,11 +307,11 @@ public void horizontalBarTransition(float wFinal) {
 public void pointBarTransition(float rFinal) {
   for (int i = 0; i < barChart.bars.length; i++) {
     Bar bar = barCopy[i];
-    float r = lerp(bar.radius, rFinal, counter/float(numTransitionSteps));
+    float r = lerp(bar.barRadius, rFinal, counter/float(numTransitionSteps));
     
     // update current bar
     Bar currBar = barChart.bars[i];
-    currBar.radius = r;
+    currBar.barRadius = r;
   }
 }
 
@@ -363,11 +363,11 @@ public void barPointTransition(float rInit) {
   
   for (int i = 0; i < barChart.bars.length; i++) {
     //Bar bar = barCopy[i];
-    //float r = lerp(bar.radius, 0, counter/float(numTransitionSteps));
+    //float r = lerp(bar.barRadius, 0, counter/float(numTransitionSteps));
     float r = lerp(rInit, 0, counter/float(numTransitionSteps));
     // update current bar
     Bar currBar = barChart.bars[i];
-    currBar.radius = r;
+    currBar.barRadius = r;
   }
 }
 
@@ -760,7 +760,7 @@ class BarChart extends Chart {
 }
 
 class Bar {
-  float x, y, w, h, radius;
+  float x, y, w, h, barRadius;
   int c;
   String label;
   boolean hasStroke = true;
@@ -772,7 +772,7 @@ class Bar {
     this.h = h;
     this.c = c;
     this.label = label;
-    this.radius = 0;
+    this.barRadius = 0;
   }
 
   public void drawBar() {
@@ -783,7 +783,7 @@ class Bar {
       noStroke();
     }
     
-    rect(x, y, w, h, radius);
+    rect(x, y, w, h, barRadius);
   }
   
   public boolean hovered() {
