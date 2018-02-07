@@ -55,7 +55,7 @@ public void setup() {
   // Remove this line to post online for Processing.js compatibility
   //surface.setResizable(true);
 
-  loadStrings();
+  loadStringsHelper();
   
   barChart = new BarChart();
   // figure out how to initialize line chart
@@ -137,7 +137,7 @@ public void handleTooltip() {
   }
 }
 
-public void loadStrings() {
+public void loadStringsHelper() {
   String[] lines = loadStrings(path);
   String[] firstLine = split(lines[0], ",");
   xName = firstLine[0];
