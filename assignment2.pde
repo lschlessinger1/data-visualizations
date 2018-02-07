@@ -205,7 +205,7 @@ public void saveBars() {
 
 public void handleTransition() {
   float size = 10;
-  float hFinal = -size;
+  float hFinal = size;
   float wFinal = size;
   float rFinal = wFinal;
   float rInit = size;
@@ -277,15 +277,23 @@ public void handleTransition() {
 public void verticalBarTransition(float hFinal) {
   for (int i = 0; i < barChart.bars.length; i++) {
     Bar bar = barCopy[i];
-    
-    float yFinal = bar.y + bar.h;
-    float y = lerp(bar.y, yFinal, counter/float(numTransitionSteps));
-    float h = lerp(bar.h, hFinal, counter/float(numTransitionSteps));
-    
-    // update current bar
     Bar currBar = barChart.bars[i];
-    currBar.y = y;
-    currBar.h = h;
+    
+	float yFinal = bar.y + bar.h;
+	if (nameMap.get(bar.label) > 0) {
+		float h = lerp(bar.h, hFinal, counter/float(numTransitionSteps));
+		float y = lerp(bar.y, bar.y - bar.barRadius, counter/float(numTransitionSteps));
+		currBar.h = h;
+		currBar.y = y;
+	} else {
+		float y = lerp(bar.y, yFinal + - bar.barRadius, counter/float(numTransitionSteps));
+		float h = lerp(bar.h, hFinal, counter/float(numTransitionSteps));
+    
+		// update current bar
+		currBar.y = y;
+		currBar.h = h;
+	}
+
   }
 }
 
@@ -469,6 +477,23 @@ abstract class Chart implements Drawable, HasAxes {
     }
   }
   
+  float calculateZeroYPos() {
+    float y1 = yShift + margin;
+    float y2 = yShift + chartHeight;
+    int numTicks = 10;
+    
+    for (int i = 0; i < numTicks + 1; i++) {
+      float y = lerp(y1, y2, i/float(numTicks));
+      int reverseIndex = -1 * (i - numTicks);
+      float lowerBound = negValuesExist ? -maxAbsValue : 0;
+      float upperBound = posValuesExist ? maxAbsValue : 0;
+      float val = lerp(lowerBound, upperBound, reverseIndex/float(numTicks));
+      if (val == 0)
+        return y;
+    }
+    return y2;
+  }
+  
   public void drawTitle() {
     String title = xName + " vs. " + yName;
     textSize(24);
@@ -521,8 +546,8 @@ class LineChart extends Chart {
       else
         pctValue = value / maxAbsValue;
         
-      float y = chartHeight + yShift - chartHeight * pctValue;
-      
+      float y = calculateZeroYPos() + chartHeight/2 - chartHeight * pctValue;
+
       int c = color(10, 125, 250);
       
       data[i] = new DataPoint(x, y, size, value, name, c);
@@ -553,13 +578,13 @@ class LineChart extends Chart {
 
     axes = new Axis[2];
     // horizontal axis: all names 
-    axes[0] = new Axis(xName, margin + xShift, chartHeight + yShift, margin + chartWidth + xShift, chartHeight + yShift);
+    axes[0] = new Axis(xName, margin + xShift, calculateZeroYPos() + chartHeight/2, margin + chartWidth + xShift, calculateZeroYPos() + chartHeight/2);
     // if there are negative values, extend y axis down
     if (negValuesExist && posValuesExist) {
       chartHeight *= 2;
     }
     // vertical axis: all values (ages)
-    axes[1] = new Axis(yName, margin + xShift, margin + yShift, margin + xShift, chartHeight + yShift);
+    axes[1] = new Axis(yName, margin + xShift, margin + yShift, margin + xShift, calculateZeroYPos() + chartHeight/2);
     setAxisTitles();
     
     float tickWidth = 5;
@@ -583,8 +608,8 @@ class LineChart extends Chart {
       if (negValuesExist) {
         hTerm = -chartHeight/2;
       }
-      float y1 = hTerm + chartHeight + yShift - tickWidth;
-      float y2 = hTerm + chartHeight + yShift + tickWidth;
+      float y1 = hTerm + calculateZeroYPos() + chartHeight/2 - tickWidth;
+      float y2 = hTerm + calculateZeroYPos() + chartHeight/2 + tickWidth;
       Line line = new Line(x, y1, x, y2);
       int tickLabelPad = 15;
       float fontSize = int(min(11, 6 * (width / float(defaultWidth))));
@@ -597,7 +622,7 @@ class LineChart extends Chart {
     float x1 = xShift - tickWidth + margin;
     float x2 = xShift + tickWidth + margin;
     float y1 = yShift + margin;
-    float y2 = yShift + chartHeight;
+    float y2 = calculateZeroYPos() + chartHeight/2;
     int numTicks = 10;
     
     for (int i = 0; i < numTicks + 1; i++) {
@@ -651,7 +676,7 @@ class BarChart extends Chart {
   public void createBars() {
     // same width and y for all bars
     float barWidth = chartWidth / numBars; // no padding for now
-    float y = chartHeight + yShift;
+    float y = calculateZeroYPos() + chartHeight/2;
     bars = new Bar[numBars];
   
     //int i = 0;
@@ -666,9 +691,17 @@ class BarChart extends Chart {
       else
         pctValue = value / maxAbsValue;
         
-      float barHeight = chartHeight * pctValue * -1;
+      float barHeight = chartHeight * pctValue;
       int c = color(10, 125, 250);
       float x = i * barWidth + margin + xShift;
+	  
+	  
+	  y = calculateZeroYPos() + chartHeight/2 - barHeight;
+	  if (barHeight < 0) {
+		y = calculateZeroYPos() + chartHeight/2;
+		
+	  }
+	  barHeight= abs(barHeight);
       bars[i] = new Bar(x, y, barWidth, barHeight, c, name);
       //i++;
     }
@@ -677,13 +710,13 @@ class BarChart extends Chart {
   public void createAxes() {
     axes = new Axis[2];
     // horizontal axis: all names 
-    axes[0] = new Axis(xName, margin + xShift, chartHeight + yShift, margin + chartWidth + xShift, chartHeight + yShift);
+    axes[0] = new Axis(xName, margin + xShift, calculateZeroYPos() + chartHeight/2, margin + chartWidth + xShift, calculateZeroYPos() + chartHeight/2);
     // if there are negative values, extend y axis down
     if (negValuesExist && posValuesExist) {
       chartHeight *= 2;
     }
     // vertical axis: all values (ages)
-    axes[1] = new Axis(yName, margin + xShift, margin + yShift, margin + xShift, chartHeight + yShift);
+    axes[1] = new Axis(yName, margin + xShift, margin + yShift, margin + xShift, calculateZeroYPos() + chartHeight/2);
     
     setAxisTitles();
     
@@ -702,8 +735,12 @@ class BarChart extends Chart {
     // for each bar, draw a tick mark on x axis and labels
     for (Bar bar: bars) {
       float x = bar.x + bar.w / 2;
-      float y1 = bar.y - tickWidth;
-      float y2 = bar.y + tickWidth;
+	  float hTerm = 0;
+	  if (negValuesExist && posValuesExist) {
+		hTerm = -chartHeight/2;
+	  }
+      float y1 = calculateZeroYPos() + chartHeight/2 + hTerm - tickWidth;
+      float y2 = calculateZeroYPos() + chartHeight/2 + hTerm + tickWidth;
       Line line = new Line(x, y1, x, y2);
       int tickLabelPad = 15;
       float fontSize = int(min(11, 6 * (width / float(defaultWidth))));
@@ -716,7 +753,7 @@ class BarChart extends Chart {
     float x1 = xShift - tickWidth + margin;
     float x2 = xShift + tickWidth + margin;
     float y1 = yShift + margin;
-    float y2 = yShift + chartHeight;
+    float y2 = calculateZeroYPos() + chartHeight/2;
     int numTicks = 10;
     
     for (int i = 0; i < numTicks + 1; i++) {
@@ -782,8 +819,8 @@ class Bar {
     } else {
       noStroke();
     }
-    
     rect(x, y, w, h, barRadius);
+
   }
   
   public boolean hovered() {
