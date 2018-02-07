@@ -478,7 +478,7 @@ abstract class Chart implements Drawable, HasAxes {
   }
   
   public float getMinValue(int[] a) {
-    float minVal = Float.MAX_VALUE;
+    float minVal = 99999999;
     for(int i = 0; i < a.length; i++) {
       int value = a[i];
       minVal = Math.min(value, minVal); 
@@ -487,7 +487,7 @@ abstract class Chart implements Drawable, HasAxes {
   }
   
   public float getMaxValue(int[] a) {
-    float maxVal = -Float.MAX_VALUE;
+    float maxVal = -99999999;
     for(int i = 0; i < a.length; i++) {
       int value = a[i];
       maxVal = Math.max(value, maxVal);     
