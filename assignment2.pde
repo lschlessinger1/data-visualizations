@@ -19,17 +19,19 @@ Line[] lineCopy;
 Circle[] circles;
 int BAR_CHART = 777;
 int LINE_CHART = 778;
-int PI_CHART = 779;
+int PIE_CHART = 779;
 int currentChartType = BAR_CHART;
 
 LineChart lineChart;
 BarChart barChart;
-Chart currentChart;
+PieChart pieChart;
+DataViz currentChart;
 
 Bar[] barCopy;
 
 ResponsiveButton lineButton;
 ResponsiveButton barButton;
+ResponsiveButton pieButton;
 
 // not sure how to do enums in processing, so do this int program states instead...
 int NOT_TRANSITIONING = 999;
@@ -62,6 +64,7 @@ public void setup() {
   saveBars();
   lineChart = new LineChart();
   
+  pieChart = new PieChart();
   // for now just save circles and lines
   //circles = new Circle[values.length];
   //lineArr = new Line[values.length - 1];
@@ -90,9 +93,10 @@ public void draw() {
       //barChart = new BarChart();
       lineChart = new LineChart();
       currentChart = lineChart;
+    } else if (currentChartType == PIE_CHART) {
+      currentChart = pieChart;
+      pieChart = new PieChart();
     }
-    // create new chart and window elements
-    
     //currentChart = barChart;
     createButtons();
   }
@@ -102,7 +106,7 @@ public void draw() {
   handleTransition();
   
   currentChart.drawSelf();
-  
+
   handleTooltip();
   
   counter++;
@@ -113,6 +117,9 @@ public void mousePressed() {
     toggleLineChart();
   } else if (barButton.hovered()) {
     toggleBarChart();
+  } else if (pieButton.hovered()) {
+    togglePieChart();
+    
   }
 }
 
@@ -170,18 +177,25 @@ public void createButtons() {
   float h =  height * r;
   lineButton = new ResponsiveButton(x, y, w, h,  "Line Chart");
   barButton = new ResponsiveButton(x - w - xPad, y, w, h,  "Bar Chart");
+  pieButton = new ResponsiveButton(x - 2 * w - 2 * xPad, y, w, h,  "Pie Chart");
 }
 
 public void drawButtons() {
   lineButton.drawButton();
   barButton.drawButton();
+  pieButton.drawButton();
 }
 
 public void toggleLineChart() {
   if (CURRENT_STATE == NOT_TRANSITIONING && currentChartType != LINE_CHART) {
     counter = 0;
-    CURRENT_STATE = VERT_RECT_TRANSITION;
- 
+    if (currentChartType == BAR_CHART) {
+      CURRENT_STATE = VERT_RECT_TRANSITION;
+    } else {
+      currentChartType = LINE_CHART;
+      lineChart = new LineChart();
+      currentChart = lineChart;
+    }
     // save initial bars
     saveBars();
 
@@ -191,7 +205,25 @@ public void toggleLineChart() {
 public void toggleBarChart() {
   if (CURRENT_STATE == NOT_TRANSITIONING && currentChartType != BAR_CHART) {
     counter = 0;
-    CURRENT_STATE = REVERSE_CONNECT_POINTS_TRANSITION;
+    if (currentChartType == LINE_CHART) {
+      CURRENT_STATE = REVERSE_CONNECT_POINTS_TRANSITION;
+    } else {
+      currentChartType = BAR_CHART;
+      barChart = new BarChart();
+      currentChart = barChart;
+    }
+  }
+}
+
+void togglePieChart() {
+  if (CURRENT_STATE == NOT_TRANSITIONING && currentChartType != PIE_CHART) {
+    
+    counter = 0;
+    //CURRENT_STATE = ...;
+    currentChartType = PIE_CHART;
+    //currentChart = pieChart;
+    pieChart = new PieChart();
+    currentChart = pieChart;
   }
 }
 
@@ -279,20 +311,20 @@ public void verticalBarTransition(float hFinal) {
     Bar bar = barCopy[i];
     Bar currBar = barChart.bars[i];
     
-	float yFinal = bar.y + bar.h;
-	if (nameMap.get(bar.label) > 0) {
-		float h = lerp(bar.h, hFinal, counter/float(numTransitionSteps));
-		float y = lerp(bar.y, bar.y - bar.barRadius, counter/float(numTransitionSteps));
-		currBar.h = h;
-		currBar.y = y;
-	} else {
-		float y = lerp(bar.y, yFinal + - bar.barRadius, counter/float(numTransitionSteps));
-		float h = lerp(bar.h, hFinal, counter/float(numTransitionSteps));
+  float yFinal = bar.y + bar.h;
+  if (nameMap.get(bar.label) > 0) {
+    float h = lerp(bar.h, hFinal, counter/float(numTransitionSteps));
+    float y = lerp(bar.y, bar.y - bar.barRadius, counter/float(numTransitionSteps));
+    currBar.h = h;
+    currBar.y = y;
+  } else {
+    float y = lerp(bar.y, yFinal + - bar.barRadius, counter/float(numTransitionSteps));
+    float h = lerp(bar.h, hFinal, counter/float(numTransitionSteps));
     
-		// update current bar
-		currBar.y = y;
-		currBar.h = h;
-	}
+    // update current bar
+    currBar.y = y;
+    currBar.h = h;
+  }
 
   }
 }
@@ -449,15 +481,11 @@ interface HasAxes {
   public void drawAxes();
 }
 
-abstract class Chart implements Drawable, HasAxes {
-  // 2 axes (tick marks, data labels, Axis label)
-  // defined in terms of height and width of display
+public abstract class DataViz implements Drawable{
   float chartHeight, chartWidth, xShift, yShift, minValue, maxValue, maxAbsValue;
-  Axis[] axes;
   boolean posValuesExist, negValuesExist;
   
-  Chart() {
-    
+  DataViz() {
     chartHeight = height / 4;
     chartWidth = width / 4;
     
@@ -475,23 +503,6 @@ abstract class Chart implements Drawable, HasAxes {
     if (negValuesExist && !posValuesExist) {
       yShift -= chartHeight / 2;
     }
-  }
-  
-  float calculateZeroYPos() {
-    float y1 = yShift + margin;
-    float y2 = yShift + chartHeight;
-    int numTicks = 10;
-    
-    for (int i = 0; i < numTicks + 1; i++) {
-      float y = lerp(y1, y2, i/float(numTicks));
-      int reverseIndex = -1 * (i - numTicks);
-      float lowerBound = negValuesExist ? -maxAbsValue : 0;
-      float upperBound = posValuesExist ? maxAbsValue : 0;
-      float val = lerp(lowerBound, upperBound, reverseIndex/float(numTicks));
-      if (val == 0)
-        return y;
-    }
-    return y2;
   }
   
   public void drawTitle() {
@@ -519,10 +530,127 @@ abstract class Chart implements Drawable, HasAxes {
     }
     return maxVal;
   }
+    
+  public float getAbsSum(int[] a) {
+    float sum = 0;
+    for(int i = 0; i < a.length; i++) {
+      int value = a[i];
+      sum += abs(value);     
+    }
+    return sum;
+  }
+  
+  int getNumNegValues(int[] a) {
+    int  numNeg = 0;
+    for(int i = 0; i < a.length; i++) {
+      float value = a[i];
+      if (value < 0)
+        numNeg++;     
+    }
+    return numNeg;
+  }
   
   public float getMaxAbsValue(int [] a) {
     return max(abs(getMaxValue(a)), abs(getMinValue(a)));
   }
+}
+
+
+public class PieChart extends DataViz {
+  float x, y;
+  float diameter;
+  float[] angles;
+  
+  PieChart() {
+    diameter = min(chartHeight, chartWidth);
+    angles = createAngles();
+    // set center
+    x = width/2;
+    y = height/2;
+  }
+  
+  float[] createAngles() {
+    float[] angleArr = new float[values.length];
+    for (int i = 0; i < angleArr.length; i++) {
+      float value = values[i];
+      float pctValue;
+      if (value >= 0)
+        pctValue = value / getAbsSum(values);
+      else
+        pctValue = value / getAbsSum(values);
+      pctValue = abs(pctValue);
+      angleArr[i] = pctValue * 360.0 ;
+    }
+
+    return angleArr;
+  }
+  
+  public void drawData() {
+    float lastAngle = 0;
+    for (int i = 0; i < values.length; i++) {
+      //color blue = color(10, 125, 250);
+      //color red = color(250, 102, 10);
+      float value = values[i];
+      String name = names[i];
+      int numNeg = getNumNegValues(values);
+      int numPos = values.length - numNeg;
+      float r, g, b;
+      if (value > 0) {
+        r = map(i, 0, numPos, 10/2, 10);
+        g = map(i, 0, numPos, 125/2, 125);
+        b = map(i, 0, numPos, 250/2, 250);
+      } else { 
+        r = map(i, 0, numNeg, 250/2, 250);
+        g = map(i, 0, numNeg, 102/2, 102);
+        b = map(i, 0, numNeg, 10/2, 10);
+      }
+      
+      fill(color(r,g,b));
+      arc(x, y, diameter, diameter, lastAngle, lastAngle + radians(angles[i]));
+      fill(0);
+      textSize(12);
+      float textX = x + diameter;
+      float textY = y - diameter/2 + i * 12;
+      textAlign(CENTER);
+      text(name, textX, textY);
+      
+      fill(color(r,g,b));
+      rect(textX - 35, textY - 12, 12, 12);
+      lastAngle += radians(angles[i]);
+    }
+  }  
+
+  public void drawSelf() {
+    drawData();
+    drawTitle();
+  }
+}
+
+abstract class Chart extends DataViz implements HasAxes  {
+  // 2 axes (tick marks, data labels, Axis label)
+  // defined in terms of height and width of display
+  Axis[] axes;
+  
+  Chart() {
+  }
+  
+  float calculateZeroYPos() {
+    float y1 = yShift + margin;
+    float y2 = yShift + chartHeight;
+    int numTicks = 10;
+    
+    for (int i = 0; i < numTicks + 1; i++) {
+      float y = lerp(y1, y2, i/float(numTicks));
+      int reverseIndex = -1 * (i - numTicks);
+      float lowerBound = negValuesExist ? -maxAbsValue : 0;
+      float upperBound = posValuesExist ? maxAbsValue : 0;
+      float val = lerp(lowerBound, upperBound, reverseIndex/float(numTicks));
+      if (val == 0)
+        return y;
+    }
+    return y2;
+  }
+ 
 }
 
 class LineChart extends Chart {
@@ -694,14 +822,14 @@ class BarChart extends Chart {
       float barHeight = chartHeight * pctValue;
       int c = color(10, 125, 250);
       float x = i * barWidth + margin + xShift;
-	  
-	  
-	  y = calculateZeroYPos() + chartHeight/2 - barHeight;
-	  if (barHeight < 0) {
-		y = calculateZeroYPos() + chartHeight/2;
-		
-	  }
-	  barHeight= abs(barHeight);
+    
+    
+    y = calculateZeroYPos() + chartHeight/2 - barHeight;
+    if (barHeight < 0) {
+    y = calculateZeroYPos() + chartHeight/2;
+    
+    }
+    barHeight= abs(barHeight);
       bars[i] = new Bar(x, y, barWidth, barHeight, c, name);
       //i++;
     }
@@ -735,10 +863,10 @@ class BarChart extends Chart {
     // for each bar, draw a tick mark on x axis and labels
     for (Bar bar: bars) {
       float x = bar.x + bar.w / 2;
-	  float hTerm = 0;
-	  if (negValuesExist && posValuesExist) {
-		hTerm = -chartHeight/2;
-	  }
+    float hTerm = 0;
+    if (negValuesExist && posValuesExist) {
+    hTerm = -chartHeight/2;
+    }
       float y1 = calculateZeroYPos() + chartHeight/2 + hTerm - tickWidth;
       float y2 = calculateZeroYPos() + chartHeight/2 + hTerm + tickWidth;
       Line line = new Line(x, y1, x, y2);
